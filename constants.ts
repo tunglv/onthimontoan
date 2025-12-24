@@ -1,77 +1,174 @@
 
-import { Exam, Grade } from './types';
+import { Exam, Grade, Question } from './types';
+
+const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+const shuffleOptions = (options: string[], correctIdx: number) => {
+  const correctValue = options[correctIdx];
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+  return {
+    options: shuffled,
+    newCorrectIdx: shuffled.indexOf(correctValue)
+  };
+};
+
+// --- BỘ ĐỀ LỚP 2 (Dựa trên PDF đề số 1 - 20) ---
+const getGrade2Template = (index: number): Question => {
+  const templates = [
+    // Dạng Tìm x (Câu 1 PDF)
+    () => {
+      const a = getRandomInt(5, 20);
+      const res = getRandomInt(a + 5, a + 30);
+      const x = res - a;
+      return {
+        id: '', text: `Tìm x, biết ${a} + x = ${res}:`,
+        options: [`x = ${x}`, `x = ${x+2}`, `x = ${x-1}`, `x = ${res+a}`],
+        correctAnswerIndex: 0
+      };
+    },
+    // Dạng Phép tính kết quả 100 (Câu 2 PDF)
+    () => {
+      const a = getRandomInt(40, 70);
+      const b = 100 - a;
+      return {
+        id: '', text: `Phép tính nào dưới đây có kết quả là 100?`,
+        options: [`${a} + ${b}`, `${a} + ${b-5}`, `${a-10} + ${b}`, `${a+1} + ${b+1}`],
+        correctAnswerIndex: 0
+      };
+    },
+    // Dạng Đơn vị đo lường (Câu 4 PDF)
+    () => {
+      const dm = getRandomInt(1, 10);
+      return {
+        id: '', text: `${dm}0dm bằng bao nhiêu cm?`,
+        options: [`${dm}00cm`, `${dm}0cm`, `${dm}cm`, `${dm+1}00cm`],
+        correctAnswerIndex: 0
+      };
+    },
+    // Dạng Số liền trước/sau (Câu 5 PDF)
+    () => {
+      const isAfter = Math.random() > 0.5;
+      return {
+        id: '', text: `Số liền ${isAfter ? 'sau' : 'trước'} số lớn nhất có 2 chữ số là:`,
+        options: isAfter ? ["100", "99", "101", "98"] : ["98", "99", "100", "97"],
+        correctAnswerIndex: 0
+      };
+    },
+    // Dạng Đếm hình (Câu 6 PDF)
+    () => ({
+      id: '', text: `Hình vẽ bên có bao nhiêu hình tứ giác?`,
+      options: ["3", "4", "5", "6"],
+      correctAnswerIndex: 2,
+      visualType: 'quadrilateral_count'
+    }),
+    // Dạng Xem đồng hồ (Câu 5 PDF Đề 2)
+    () => {
+      const h = getRandomInt(1, 12);
+      const m = [0, 15, 30][getRandomInt(0, 2)];
+      return {
+        id: '', text: `${h} giờ ${m === 0 ? '' : m + ' phút'} còn gọi là:`,
+        options: [`${h} giờ ${m === 0 ? '' : m + ' phút'}`, `${h+12} giờ ${m === 0 ? '' : m + ' phút'}`, "12 giờ", "6 giờ sáng"],
+        correctAnswerIndex: 1,
+        visualType: 'clock_analog',
+        visualData: { hour: h, minute: m }
+      };
+    },
+    // Toán đố (Câu 9 PDF)
+    () => {
+      const a = getRandomInt(30, 60);
+      const b = getRandomInt(10, 25);
+      return {
+        id: '', text: `Mảnh vải xanh dài ${a}dm, mảnh vải tím ngắn hơn ${b}dm. Hỏi mảnh vải tím dài bao nhiêu dm?`,
+        options: [`${a-b}dm`, `${a+b}dm`, `${b}dm`, `${a}dm`],
+        correctAnswerIndex: 0
+      };
+    }
+  ];
+
+  const q = templates[index % templates.length]();
+  const { options, newCorrectIdx } = shuffleOptions(q.options, q.correctAnswerIndex);
+  return { ...q, options, correctAnswerIndex: newCorrectIdx } as Question;
+};
+
+// --- BỘ ĐỀ LỚP 4 (Dựa trên PDF đề số 1 - 20) ---
+const getGrade4Template = (index: number): Question => {
+  const templates = [
+    // Chia hết cho 2 và 5 (Câu 1 PDF L4)
+    () => ({
+      id: '', text: "Số nào vừa chia hết cho 2 vừa chia hết cho 5?",
+      options: ["5000", "1205", "3412", "2864"],
+      correctAnswerIndex: 0
+    }),
+    // Trung bình cộng (Câu 2 PDF L4)
+    () => {
+      const nums = [36, 42, 57];
+      const avg = Math.round(nums.reduce((a, b) => a + b) / nums.length);
+      return {
+        id: '', text: `Trung bình cộng của ${nums.join('; ')} là:`,
+        options: [avg.toString(), (avg+5).toString(), "405", "145"],
+        correctAnswerIndex: 0
+      };
+    },
+    // Thế kỷ (Câu 3 PDF L4)
+    () => {
+      const year = getRandomInt(1000, 2024);
+      const century = Math.ceil(year / 100);
+      return {
+        id: '', text: `Năm ${year} thuộc thế kỷ nào?`,
+        options: [`Thế kỷ ${century}`, `Thế kỷ ${century-1}`, `Thế kỷ ${century+1}`, "Thế kỷ 21"],
+        correctAnswerIndex: 0
+      };
+    },
+    // Đơn vị khối lượng (Câu 4 PDF L4)
+    () => {
+      const ton = getRandomInt(2, 5);
+      const kg = getRandomInt(10, 99);
+      return {
+        id: '', text: `${ton} tấn ${kg} kg = ....... kg. Số cần điền là:`,
+        options: [`${ton}0${kg}`, `${ton}${kg}`, `${ton}00${kg}`, `${ton}50`],
+        correctAnswerIndex: 0
+      };
+    },
+    // Hình học song song (Câu 4 PDF Đề 2 L4)
+    () => ({
+      id: '', text: "Quan sát hình vẽ, đường thẳng AB song song với đường thẳng nào?",
+      options: ["CD", "IK", "AC", "BD"],
+      correctAnswerIndex: 0,
+      visualType: 'geometry_lines'
+    }),
+    // Phân số (Câu 3 PDF Đề 12 L4)
+    () => ({
+      id: '', text: "Phân số chỉ phần đã tô màu trong hình dưới đây là:",
+      options: ["3/8", "5/8", "3/4", "1/2"],
+      correctAnswerIndex: 0,
+      visualType: 'fraction_grid',
+      visualData: { filled: 3, total: 8 }
+    })
+  ];
+
+  const q = templates[index % templates.length]();
+  const { options, newCorrectIdx } = shuffleOptions(q.options, q.correctAnswerIndex);
+  return { ...q, options, correctAnswerIndex: newCorrectIdx } as Question;
+};
+
+const createExams = (grade: Grade, count: number): Exam[] => {
+  return Array.from({ length: count }).map((_, i) => {
+    const questions: Question[] = Array.from({ length: 10 }).map((__, j) => {
+      const q = grade === Grade.Grade2 ? getGrade2Template(j + i) : getGrade4Template(j + i);
+      return { ...q, id: `q-${grade}-${i}-${j}` };
+    });
+
+    return {
+      id: `exam-${grade}-${i + 1}`,
+      title: `Đề thi Học kỳ 1 - Đề số ${i + 1}`,
+      grade: grade,
+      description: `Đề kiểm tra định kỳ học kỳ 1 môn Toán lớp ${grade}. Nội dung bám sát bộ đề luyện thi của Bộ Giáo dục.`,
+      questions
+    };
+  });
+};
 
 export const SAMPLE_EXAMS: Exam[] = [
-  {
-    id: 'l2-hk1-01',
-    title: 'Đề thi Học kỳ 1 - Đề số 1',
-    grade: Grade.Grade2,
-    description: 'Bao gồm kiến thức về phép cộng, phép trừ có nhớ trong phạm vi 100, đo lường và hình học cơ bản.',
-    questions: [
-      {
-        id: 'q1',
-        text: 'Tính: 38 + 25 = ?',
-        options: ['53', '63', '58', '68'],
-        correctAnswerIndex: 1,
-        explanation: '38 + 25: Ta lấy 8 + 5 = 13, viết 3 nhớ 1. 3 + 2 = 5, thêm 1 là 6. Kết quả là 63.'
-      },
-      {
-        id: 'q2',
-        text: 'Trong phép trừ 72 - 45, số hiệu là bao nhiêu?',
-        options: ['27', '37', '17', '33'],
-        correctAnswerIndex: 0,
-        explanation: '72 - 45 = 27.'
-      },
-      {
-        id: 'q3',
-        text: 'Hình vẽ có bao nhiêu hình tam giác?',
-        options: ['2', '3', '4', '5'],
-        correctAnswerIndex: 1,
-        explanation: 'Cần đếm kỹ các hình đơn và hình ghép.'
-      },
-      {
-        id: 'q4',
-        text: 'Một sợi dây dài 5dm, đổi ra xăng-ti-mét là:',
-        options: ['5 cm', '50 cm', '500 cm', '0.5 cm'],
-        correctAnswerIndex: 1,
-        explanation: '1dm = 10cm, nên 5dm = 50cm.'
-      }
-    ]
-  },
-  {
-    id: 'l4-hk1-01',
-    title: 'Đề thi Học kỳ 1 - Đề số 1',
-    grade: Grade.Grade4,
-    description: 'Kiến thức về số tự nhiên đến lớp triệu, phép tính nhân chia, tính chất hình học và giải toán có lời văn.',
-    questions: [
-      {
-        id: 'q1',
-        text: 'Giá trị của chữ số 5 trong số 352,418 là:',
-        options: ['500', '5,000', '50,000', '500,000'],
-        correctAnswerIndex: 2,
-        explanation: 'Chữ số 5 nằm ở hàng chục nghìn.'
-      },
-      {
-        id: 'q2',
-        text: 'Kết quả của phép tính 125 x 8 là:',
-        options: ['1,000', '800', '1,200', '1,050'],
-        correctAnswerIndex: 0,
-        explanation: '125 nhân 8 bằng 1000.'
-      },
-      {
-        id: 'q3',
-        text: 'Góc nhọn là góc có số đo như thế nào?',
-        options: ['Lớn hơn 90 độ', 'Bằng 90 độ', 'Nhỏ hơn 90 độ', 'Bằng 180 độ'],
-        correctAnswerIndex: 2,
-        explanation: 'Góc nhọn luôn nhỏ hơn góc vuông (90 độ).'
-      },
-      {
-        id: 'q4',
-        text: 'Trung bình cộng của hai số 24 và 36 là:',
-        options: ['60', '30', '25', '32'],
-        correctAnswerIndex: 1,
-        explanation: '(24 + 36) : 2 = 60 : 2 = 30.'
-      }
-    ]
-  }
+  ...createExams(Grade.Grade2, 30),
+  ...createExams(Grade.Grade4, 30)
 ];
