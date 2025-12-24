@@ -1,0 +1,8 @@
+
+{
+  "name": "Toán Học Kỳ 1 - Lớp 2 & 4",
+  "description": "Ứng dụng luyện thi học kỳ 1 môn Toán cho học sinh lớp 2 và lớp 4 theo chương trình mới của Bộ Giáo dục. Cung cấp bộ đề thi đa dạng kèm giải thích chi tiết từ AI.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
